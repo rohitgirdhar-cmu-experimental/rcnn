@@ -36,7 +36,7 @@ catch
   catch
   end
   %parfor i = 1:length(imdb.image_ids)
-  parfor i = 1:length(imdb.image_ids)
+  for i = 1:length(imdb.image_ids)
     tic_toc_print('roidb (%s): %d/%d\n', roidb.name, i, length(imdb.image_ids));
     r = attach_proposals(regions.boxes, imdb.image_ids(i));
     rois(i) = r;
@@ -54,7 +54,7 @@ end
 % ------------------------------------------------------------------------
 function rec = attach_proposals(boxes, image_ids)
 % ------------------------------------------------------------------------
-
+DEBUG = 0;
 % change selective search order from [y1 x1 y2 x2] to [x1 y1 x2 y2]
 %boxes = boxes(:, [2 1 4 3]);
 
@@ -71,35 +71,30 @@ image_ids = cellfun(@(x) str2num(x), image_ids);
 for image_id = image_ids(:)'
     selb = boxes{image_id};
     selb = selb(:, [2 1 4 3]); % fix to (x1 y1 x2 y2)
-    [cls, gtb] = readBoxes(fullfile('~/Work/Projects/002_GeoObjDet/rcnn/datasets/NYU/Labels', ...
+    [gt_classes, gtb] = readBoxes(fullfile('~/Work/Projects/002_GeoObjDet/rcnn/datasets/NYU/Labels', ...
                 [num2str(image_id) '.txt']));
-    % add the GTs
-    s_gt = [];
-    s_overlap = [];
-    s_boxes = [];
-    s_feat = [];
-    s_class = [];
-    for i = 1 : size(gtb, 1)
-        s_gt(end + 1) = 1;
-        s_overlap(end + 1, 1:5) = 0;
-        s_overlap(end, cls(i)) = 1;
-        s_boxes(end + 1, :) = gtb(i, :);
-        s_class(end + 1) = cls(i);
-    end
-    for i = 1 : size(selb, 1)
-        s_gt(end + 1) = 0;
-        s_boxes(end + 1, :) = selb(i, :);
-        s_class(end + 1) = int32(getClass(selb(i, :), gtb, cls));
-        s_overlap(end + 1, 1 : 5) = 0;
-        if s_class(end) ~= 0
-            s_overlap(end, s_class(end)) = 1;
+    gtb = int32(gtb);
+    selb = int32(selb);
+    if DEBUG
+        I = imread(fullfile('~/Work/Projects/002_GeoObjDet/rcnn/datasets/NYU/JPEGImages/', [num2str(image_id) '.jpg']));
+        for i = 1 : size(selb, 1)
+            clip = I(selb(i, 2) : selb(i, 4), selb(i, 1) : selb(i, 3), :);
+            imwrite(clip, fullfile('~/Work/Projects/002_GeoObjDet/rcnn/imdb/nyu/temp/', ['ss_' num2str(image_id) '_' num2str(i) '.jpg']));
         end
     end
-    rec.gt = s_gt;
-    rec.overlap = s_overlap;
-    rec.boxes = s_boxes;
-    rec.feat = s_feat;
-    rec.class = s_class;
+
+    all_boxes = cat(1, gtb, selb);
+    num_gt_boxes = size(gtb, 1);
+    num_boxes = size(selb, 1);
+    rec.gt = cat(1, true(num_gt_boxes, 1), false(num_boxes, 1));
+    rec.overlap = zeros(num_gt_boxes + num_boxes, 5);
+    for i = 1 : num_gt_boxes
+        rec.overlap(:, gt_classes(i)) = ...
+            max(rec.overlap(:, gt_classes(i)), boxoverlap(all_boxes, gtb(i, :)));
+    end
+    rec.boxes = single(all_boxes);
+    rec.feat = [];
+    rec.class = uint8(cat(1, gt_classes, zeros(num_boxes, 1)));
 end
                  
 function [cls, boxes] = readBoxes(fpath)
@@ -109,20 +104,23 @@ cls = data{1};
 boxes = cat(2, data{2}, data{3}, data{2} + data{4}, data{3} + data{5});
 fclose(fid);
 
-function cls = getClass(box, gtboxes, gtclasses)
+function [cls, overlaps] = getClass(box, gtboxes, gtclasses)
 mxOverlap = 0;
 cls = 0;
+overlaps = zeros(1, 5);
 for i = 1 : size(gtboxes, 1)
     ov = computeOverlap(box, gtboxes(i, :));
-    if mxOverlap < ov
-        mxOverlap = ov;
-        cls = gtclasses(i);
-    end
+    overlaps(gtclasses(i)) = max(ov, overlaps(gtclasses(i)));
+end
+[mval, cls] = max(overlaps);
+if mval == 0
+    cls = 0;
 end
 cls = int32(cls);
 
 function over = computeOverlap(a, b)
 % both are rectangles in xmin ymin xmax ymax
-over = rectint([a(1) a(2) a(3) - a(1) a(4) - a(2)], [b(1) b(2) b(3) - b(1) b(4) - b(2)]);
-
+inter = rectint([a(1) a(2) a(3) - a(1) a(4) - a(2)], [b(1) b(2) b(3) - b(1) b(4) - b(2)]);
+gt = (b(3) - b(1)) * (b(4) - b(2));
+over = inter ./ gt;
 

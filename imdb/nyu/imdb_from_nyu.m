@@ -58,7 +58,7 @@ catch
 
   for i = 1:length(imdb.image_ids)
     tic_toc_print('imdb (%s): %d/%d\n', imdb.name, i, length(imdb.image_ids));
-    info = imfinfo(fullfile(imdb.image_dir, [imdb.image_ids{i} imdb.extension]));
+    info = imfinfo(imdb.image_at(i));
     imdb.sizes(i, :) = [info.Height info.Width];
   end
 

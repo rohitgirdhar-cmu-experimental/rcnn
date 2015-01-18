@@ -1,5 +1,8 @@
-function genImgsAndLabs()
-load('nyu_depth_v2_labeled.mat');
+function genImgsAndLabs(images, labels)
+if nargin == 0
+    load('nyu_depth_v2_labeled.mat');
+end
+DEBUG = 1;
 load('splits.mat');
 
 % names = {'bed', 'chair', 'mtv', 'sofa', 'table'};
@@ -17,8 +20,17 @@ for i = 1 : size(images, 4)
     fid = fopen(fullfile(labelsdir, [num2str(i) '.txt']), 'w');
     for j = 1 : numel(myids)
         bboxes = getObjDets(label, ids{j});
+        bboxes(:, :) = int32(bboxes);
         for k = 1 : size(bboxes, 1)
-            fprintf(fid, '%d %f %f %f %f\n', myids{j}, bboxes(k, 1), ...
+            % Ignore too small bounding boxes
+            if bboxes(k, 3) < 25 || bboxes(k, 4) < 25
+                continue
+            end
+            if DEBUG
+                clip = I(bboxes(k, 2) : bboxes(k, 2) + bboxes(k, 4), bboxes(k, 1) : bboxes(k, 1) + bboxes(k, 3), :);
+                imwrite(clip, fullfile('temp', [num2str(i) '_' num2str(j) '_' num2str(k) '.jpg']));
+            end
+            fprintf(fid, '%d %d %d %d %d\n', myids{j}, bboxes(k, 1), ...
                     bboxes(k, 2), bboxes(k, 3), bboxes(k, 4));
         end
     end
