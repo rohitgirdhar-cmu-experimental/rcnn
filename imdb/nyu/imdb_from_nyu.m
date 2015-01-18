@@ -36,10 +36,12 @@ catch
 
   imdb.name = ['nyu'];
   imdb.image_dir = '~/Work/Projects/002_GeoObjDet/rcnn/datasets/NYU/JPEGImages';
-  fid = fopen('~/Work/Projects/002_GeoObjDet/rcnn/datasets/NYU/ImgsList.txt'); % change to train list
-  imdb.image_ids = textscan(fid, '%s');
-  imdb.image_ids = imdb.image_ids{1};
-  fclose(fid);
+%  fid = fopen('~/Work/Projects/002_GeoObjDet/rcnn/datasets/NYU/ImgsList.txt'); % change to train list
+%  imdb.image_ids = textscan(fid, '%s');
+%  imdb.image_ids = imdb.image_ids{1};
+%  fclose(fid);
+  load('datasets/NYU/splits.mat', 'trainNdxs');
+  imdb.image_ids = arrayfun(@(x) num2str(x), trainNdxs, 'UniformOutput', false);
   imdb.extension = 'jpg';
   imdb.classes = {'bed', 'chair', 'monitortv', 'sofa', 'table'};
   imdb.num_classes = length(imdb.classes);
