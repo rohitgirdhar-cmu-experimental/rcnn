@@ -32,7 +32,7 @@ catch
   fprintf('done\n');
 
   try
-    matlabpool open 8;
+    matlabpool open 4;
   catch
   end
   %parfor i = 1:length(imdb.image_ids)
@@ -54,7 +54,7 @@ end
 % ------------------------------------------------------------------------
 function rec = attach_proposals(boxes, image_ids)
 % ------------------------------------------------------------------------
-DEBUG = 0;
+DEBUG = 1;
 % change selective search order from [y1 x1 y2 x2] to [x1 y1 x2 y2]
 %boxes = boxes(:, [2 1 4 3]);
 
@@ -77,9 +77,11 @@ for image_id = image_ids(:)'
     selb = int32(selb);
     if DEBUG
         I = imread(fullfile('~/Work/Projects/002_GeoObjDet/rcnn/datasets/NYU/JPEGImages/', [num2str(image_id) '.jpg']));
-        for i = 1 : size(selb, 1)
-            clip = I(selb(i, 2) : selb(i, 4), selb(i, 1) : selb(i, 3), :);
-            imwrite(clip, fullfile('~/Work/Projects/002_GeoObjDet/rcnn/imdb/nyu/temp/', ['ss_' num2str(image_id) '_' num2str(i) '.jpg']));
+        boxes_to_dump = gtb;
+        for i = 1 : size(boxes_to_dump, 1)
+            clip = I(boxes_to_dump(i, 2) : boxes_to_dump(i, 4), ...
+                boxes_to_dump(i, 1) : boxes_to_dump(i, 3), :);
+            imwrite(clip, fullfile('~/Work/Projects/002_GeoObjDet/rcnn/imdb/nyu/dump/', ['ss_' num2str(image_id) '_' num2str(i) '.jpg']));
         end
     end
 

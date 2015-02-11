@@ -28,7 +28,7 @@ if nargin > 2
   imsz = size(im);
   % resize so that the image is 300 pixels per inch
   % and 1.2 inches tall
-  scale = 1.2 / (imsz(1)/300);
+  scale = 1.2 / (imsz(1)/300) * 4;
   im = imresize(im, scale, 'method', 'cubic');
   %f = fspecial('gaussian', [3 3], 0.5);
   %im = imfilter(im, f);
@@ -38,6 +38,12 @@ else
   cwidth = 2;
 end
 
+if print
+    figure('Visible', 'off');
+    set(gcf, 'Position', [10 10 512 512]);
+else
+    figure;
+end
 image(im); 
 if print
   truesize(gcf);

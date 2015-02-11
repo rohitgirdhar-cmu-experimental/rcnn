@@ -29,7 +29,7 @@ inter = w.*h;
 aarea = (a(:,3)-a(:,1)+1) .* (a(:,4)-a(:,2)+1);
 barea = (b(3)-b(1)+1) * (b(4)-b(2)+1);
 % intersection over union overlap
-o = inter ./ (aarea+barea-inter);
+o = double(inter) * 1.0 ./ double(aarea+barea-inter);
 % set invalid entries to 0 overlap
 o(w <= 0) = 0;
 o(h <= 0) = 0;

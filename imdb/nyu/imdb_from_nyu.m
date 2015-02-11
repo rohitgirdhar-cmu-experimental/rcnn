@@ -1,4 +1,4 @@
-function imdb = imdb_from_voc()
+function imdb = imdb_from_voc(type)
 % imdb = imdb_from_voc(root_dir, image_set, year)
 %   Builds an image database for the PASCAL VOC devkit located
 %   at root_dir using the image_set and year.
@@ -27,7 +27,13 @@ function imdb = imdb_from_voc()
 %imdb.eval_func = pointer to the function that evaluates detections
 %imdb.roidb_func = pointer to the function that returns regions of interest
 
-cache_file = ['./imdb/nyu/cache/imdb.mat'];
+if nargin == 0
+    opts.type = 'train';
+else
+    opts.type = type;
+end
+
+cache_file = ['./imdb/nyu/cache/imdb_' opts.type '.mat'];
 try
   load(cache_file);
 catch
@@ -35,13 +41,17 @@ catch
 %  VOCopts.testset = image_set;
 
   imdb.name = ['nyu'];
-  imdb.image_dir = '~/Work/Projects/002_GeoObjDet/rcnn/datasets/NYU/JPEGImages';
+  imdb.image_dir = '/home/rgirdhar/Work/Projects/002_GeoObjDet/rcnn/datasets/NYU/JPEGImages';
 %  fid = fopen('~/Work/Projects/002_GeoObjDet/rcnn/datasets/NYU/ImgsList.txt'); % change to train list
 %  imdb.image_ids = textscan(fid, '%s');
 %  imdb.image_ids = imdb.image_ids{1};
 %  fclose(fid);
-  load('datasets/NYU/splits.mat', 'trainNdxs');
-  imdb.image_ids = arrayfun(@(x) num2str(x), trainNdxs, 'UniformOutput', false);
+  load('datasets/NYU/splits.mat', 'trainNdxs', 'testNdxs');
+  Ndxs = trainNdxs;
+  if strcmp(opts.type, 'test')
+    Ndxs = testNdxs;
+  end
+  imdb.image_ids = arrayfun(@(x) num2str(x), Ndxs, 'UniformOutput', false);
   imdb.extension = 'jpg';
   imdb.classes = {'bed', 'chair', 'monitortv', 'sofa', 'table'};
   imdb.num_classes = length(imdb.classes);

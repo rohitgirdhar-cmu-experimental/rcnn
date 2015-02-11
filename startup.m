@@ -23,6 +23,8 @@ else
 end
 addpath('experiments');
 addpath('imdb');
+addpath('imdb/nyu');
 addpath('vis/pool5-explorer');
 addpath('examples');
+addpath('vis/export_fig');
 fprintf('R-CNN startup done\n');

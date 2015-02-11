@@ -20,12 +20,15 @@ function res = rcnn_test_softmax(rcnn_model, imdb, suffix)
 
 conf = rcnn_config('sub_dir', imdb.name);
 image_ids = imdb.image_ids;
+%image_ids = image_ids(1:3); %%% FOR DEBUGGING
 
 rcnn_model = fc8_model(rcnn_model);
 
 % assume they are all the same
-feat_opts = rcnn_model.training_opts;
-num_classes = length(rcnn_model.classes);
+%feat_opts = rcnn_model.training_opts;
+%num_classes = length(rcnn_model.classes);
+num_classes = 5;
+classes = {'bed','chair','monitortv','sofa','table'};
 
 if ~exist('suffix', 'var') || isempty(suffix)
   suffix = '';
@@ -66,12 +69,14 @@ catch
     for i = folds{f}
       count = count + 1;
       fprintf('%s: test (%s) %d/%d\n', procid(), imdb.name, count, length(image_ids));
-      d = rcnn_load_cached_pool5_features(feat_opts.cache_name, ...
+%      d = rcnn_load_cached_pool5_features(feat_opts.cache_name, ...
+      d = rcnn_load_cached_pool5_features('v1_finetune_nyu_train_90000', ...
           imdb.name, image_ids{i});
       if isempty(d.feat)
         continue;
       end
-      d.feat = rcnn_pool5_to_fcX(d.feat, feat_opts.layer, rcnn_model);
+%      d.feat = rcnn_pool5_to_fcX(d.feat, feat_opts.layer, rcnn_model);
+      d.feat = rcnn_pool5_to_fcX(d.feat, 7, rcnn_model);
       zs = bsxfun(@plus, d.feat*rcnn_model.detectors(f).W, rcnn_model.detectors(f).B);
       zs = bsxfun(@times, exp(zs),  1 ./ sum(exp(zs), 2));
       zs = zs(:, 2:end);
@@ -99,6 +104,7 @@ catch
     end
   end
 
+  thresh = thresh * 3;
   for i = 1:num_classes
     % go back through and prune out detections below the found threshold
     for j = 1:length(image_ids)
@@ -109,10 +115,20 @@ catch
       end
     end
 
-    save_file = [conf.cache_dir rcnn_model.classes{i} '_boxes_' imdb.name suffix];
+    %save_file = [conf.cache_dir rcnn_model.classes{i} '_boxes_' imdb.name suffix];
+    save_file = [conf.cache_dir classes{i} '_boxes_' imdb.name suffix];
     boxes = aboxes{i};
     inds = box_inds{i};
     save(save_file, 'boxes', 'inds');
+
+    %% draw ?
+    for j = 1:length(image_ids)
+        I = imread(fullfile(imdb.image_dir, [image_ids{j} '.' imdb.extension]));
+        keep = nms(boxes{j}, 0.3);
+        mkdir_if_missing(fullfile('output/', classes{i}));
+        showboxes2(I, boxes{j}(keep, :), fullfile('output/', classes{i}, [image_ids{j} '.jpg']));
+    end
+
     clear boxes inds;
   end
 end
@@ -121,8 +137,9 @@ end
 % Peform AP evaluation
 % ------------------------------------------------------------------------
 for model_ind = 1:num_classes
-  cls = rcnn_model.classes{model_ind};
-  res(model_ind) = imdb.eval_func(cls, aboxes{model_ind}, imdb, suffix);
+%  cls = rcnn_model.classes{model_ind};
+  cls = classes{model_ind};
+%  res(model_ind) = imdb.eval_func(cls, aboxes{model_ind}, imdb, suffix);
 end
 
 fprintf('\n~~~~~~~~~~~~~~~~~~~~\n');
