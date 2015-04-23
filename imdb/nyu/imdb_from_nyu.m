@@ -26,7 +26,7 @@ function imdb = imdb_from_voc(type)
 %imdb.class_ids
 %imdb.eval_func = pointer to the function that evaluates detections
 %imdb.roidb_func = pointer to the function that returns regions of interest
-
+root_dir = '/home/rgirdhar/Work/Projects/002_GeoObjDet/eval/NYUdevkit/';
 if nargin == 0
     opts.type = 'train';
 else
@@ -37,8 +37,8 @@ cache_file = ['./imdb/nyu/cache/imdb_' opts.type '.mat'];
 try
   load(cache_file);
 catch
-%  VOCopts = get_voc_opts(root_dir);
-%  VOCopts.testset = image_set;
+  VOCopts = get_voc_opts(root_dir);
+  %VOCopts.testset = image_set;
 
   imdb.name = ['nyu'];
   imdb.image_dir = '/home/rgirdhar/Work/Projects/002_GeoObjDet/rcnn/datasets/NYU/JPEGImages';
@@ -60,7 +60,7 @@ catch
   imdb.class_ids = 1:imdb.num_classes;
 
   % private VOC details
-  % imdb.details.VOCopts = VOCopts; % none here
+  imdb.details.VOCopts = VOCopts;
 
   % VOC specific functions for evaluation and region of interest DB
 %  imdb.eval_func = @imdb_eval_voc;
