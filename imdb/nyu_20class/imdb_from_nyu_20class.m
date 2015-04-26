@@ -40,7 +40,7 @@ catch
   VOCopts = get_voc_opts_nyu20class(root_dir);
   %VOCopts.testset = image_set;
 
-  imdb.name = ['nyu_20class'];
+  imdb.name = ['nyu_20class_' opts.type];
   imdb.image_dir = '/home/rgirdhar/Work/Projects/002_GeoObjDet/rcnn/datasets/NYU/JPEGImages';
 %  fid = fopen('~/Work/Projects/002_GeoObjDet/rcnn/datasets/NYU/ImgsList.txt'); % change to train list
 %  imdb.image_ids = textscan(fid, '%s');
@@ -63,8 +63,8 @@ catch
   imdb.details.VOCopts = VOCopts;
 
   % VOC specific functions for evaluation and region of interest DB
-  imdb.eval_func = @imdb_eval_nyu;
-  imdb.roidb_func = @roidb_from_nyu;
+  imdb.eval_func = @imdb_eval_nyu_20class;
+  imdb.roidb_func = @roidb_from_nyu_20class;
   imdb.image_at = @(i) ...
       sprintf('%s/%s.%s', imdb.image_dir, imdb.image_ids{i}, imdb.extension);
 

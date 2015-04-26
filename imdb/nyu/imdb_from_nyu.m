@@ -63,7 +63,7 @@ catch
   imdb.details.VOCopts = VOCopts;
 
   % VOC specific functions for evaluation and region of interest DB
-%  imdb.eval_func = @imdb_eval_voc;
+  imdb.eval_func = @imdb_eval_nyu;
   imdb.roidb_func = @roidb_from_nyu;
   imdb.image_at = @(i) ...
       sprintf('%s/%s.%s', imdb.image_dir, imdb.image_ids{i}, imdb.extension);

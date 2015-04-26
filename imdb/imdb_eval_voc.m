@@ -59,7 +59,7 @@ res_fn = sprintf(VOCopts.detrespath, res_id, cls);
 fid = fopen(res_fn, 'w');
 for i = 1:length(image_ids);
   bbox = boxes{i};
-  keep = nms(bbox, nms_thresh)
+  keep = nms(bbox, nms_thresh);
   bbox = bbox(keep,:);
   for j = 1:size(bbox,1)
     fprintf(fid, '%s %f %d %d %d %d\n', image_ids{i}, bbox(j,end), bbox(j,1:4));
@@ -82,7 +82,6 @@ if do_eval
   % force plot limits
   ylim([0 1]);
   xlim([0 1]);
-
   print(gcf, '-djpeg', '-r0', ...
       [conf.cache_dir cls '_pr_' imdb.name suffix '.jpg']);
 end

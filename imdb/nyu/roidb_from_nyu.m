@@ -27,7 +27,8 @@ catch
   roidb.name = imdb.name;
 
   fprintf('Loading region proposals...');
-  regions_file = './data/nyu_selsearch_boxes.mat';
+  %regions_file = './data/nyu_selsearch_boxes.mat';
+  regions_file = '/home/rgirdhar/Work/Projects/002_GeoObjDet/data/nyu_selsearch_boxes.mat';
   regions = load(regions_file);
   fprintf('done\n');
 
@@ -54,7 +55,7 @@ end
 % ------------------------------------------------------------------------
 function rec = attach_proposals(boxes, image_ids)
 % ------------------------------------------------------------------------
-DEBUG = 1;
+DEBUG = 0;
 % change selective search order from [y1 x1 y2 x2] to [x1 y1 x2 y2]
 %boxes = boxes(:, [2 1 4 3]);
 

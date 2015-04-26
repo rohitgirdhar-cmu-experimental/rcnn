@@ -24,6 +24,7 @@ end
 addpath('experiments');
 addpath('imdb');
 addpath('imdb/nyu');
+addpath('imdb/nyu_20class');
 addpath('vis/pool5-explorer');
 addpath('examples');
 addpath('vis/export_fig');

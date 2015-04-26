@@ -34,16 +34,16 @@ ip.addRequired('imdb', @isstruct);
 ip.addParamValue('svm_C',           10^-3,  @isscalar);
 ip.addParamValue('bias_mult',       10,     @isscalar);
 ip.addParamValue('pos_loss_weight', 2,      @isscalar);
-ip.addParamValue('layer',           7,      @isscalar);
+ip.addParamValue('layer',           6,      @isscalar);
 ip.addParamValue('k_folds',         2,      @isscalar);
 ip.addParamValue('checkpoint',      0,      @isscalar);
 ip.addParamValue('crop_mode',       'warp', @isstr);
 ip.addParamValue('crop_padding',    16,     @isscalar);
 ip.addParamValue('net_file', ...
-    './data/caffe_nets/finetune_voc_2007_trainval_iter_70k', ...
+    '/home/rgirdhar/Work/Projects/002_GeoObjDet/multimodal_learning/004_onlypos2/models/finetune_nyu_train_iter_100000.caffemodel', ...
     @isstr);
 ip.addParamValue('cache_name', ...
-    'v1_finetune_voc_2007_trainval_iter_70000', @isstr);
+    'v1_finetune_nyu_train_90000', @isstr);
 
 
 ip.parse(imdb, varargin{:});
